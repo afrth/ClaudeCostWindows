@@ -88,20 +88,34 @@ The model is detected automatically from the transcript — no configuration nee
 | `install.ps1` | One-command installer (Windows, supports `-Insiders`) |
 | `install.sh` | One-command installer (macOS / Linux) |
 
-## Data file
+## Data files
 
-Stats are stored in `~/.claude/cost_tracker.json`:
+Two files are written to `~/.claude/`:
+
+### `cost_tracker.json` — summary
+
+Aggregated totals read by the VSCode extension:
 
 ```json
 {
   "total_cost": 2.49,
   "total_requests": 74,
-  "by_day": {
-    "2026-04-24": 2.49
-  },
+  "by_day":     { "2026-04-24": 2.49 },
+  "by_project": { "ClaudeCost": 1.80, "other-repo": 0.69 },
+  "by_model":   { "claude-opus-4-7": 2.10, "claude-sonnet-4-6": 0.39 },
   "last_updated": "2026-04-24 09:21 UTC"
 }
 ```
+
+### `cost_log.jsonl` — detailed log
+
+One line per Claude response (append-only), useful for analytics or exporting to a spreadsheet:
+
+```json
+{"ts":"2026-04-24T09:21:03Z","date":"2026-04-24","session_id":"abc123","project":"ClaudeCost","cwd":"/path/to/ClaudeCost","model":"claude-opus-4-7","msg_id":"msg_01...","input_tokens":12,"output_tokens":340,"cache_read":8421,"cache_write_5m":1560,"cache_write_1h":0,"cost_usd":0.01234567}
+```
+
+Each record includes timestamp, project, model, token counts per type, and the exact cost in USD.
 
 ## Uninstall
 
@@ -113,6 +127,7 @@ Remove-Item -Recurse -Force "$env:USERPROFILE\.vscode\extensions\claude-cost-tra
 # Remove-Item -Recurse -Force "$env:USERPROFILE\.vscode-insiders\extensions\claude-cost-tracker-0.1.0"
 Remove-Item "$env:USERPROFILE\.claude\hooks\cost_tracker.py"
 Remove-Item "$env:USERPROFILE\.claude\cost_tracker.json"
+Remove-Item "$env:USERPROFILE\.claude\cost_log.jsonl"
 # Then remove the "hooks" block from %USERPROFILE%\.claude\settings.json
 ```
 
@@ -122,5 +137,6 @@ Remove-Item "$env:USERPROFILE\.claude\cost_tracker.json"
 rm -rf ~/.vscode/extensions/claude-cost-tracker-0.1.0
 rm ~/.claude/hooks/cost_tracker.py
 rm ~/.claude/cost_tracker.json
+rm ~/.claude/cost_log.jsonl
 # Remove the "hooks" block from ~/.claude/settings.json
 ```
