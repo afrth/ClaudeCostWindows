@@ -2,7 +2,7 @@
 
 Shows your Claude API spending in the VSCode status bar, updated automatically after each response.
 
-![Status bar showing Claude cost](https://i.imgur.com/placeholder.png)
+![Status bar showing Claude cost](docs/status-bar.png)
 
 ## How it works
 
