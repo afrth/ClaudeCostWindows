@@ -68,7 +68,7 @@ def main():
         return
 
     try:
-        with open(COST_FILE) as f:
+        with open(COST_FILE, encoding="utf-8") as f:
             tracker = json.load(f)
     except Exception:
         tracker = {}
@@ -83,7 +83,7 @@ def main():
     new_cost = 0.0
     new_ids  = []
 
-    with open(transcript_path) as f:
+    with open(transcript_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -117,7 +117,7 @@ def main():
     tracker["last_updated"]   = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     session["seen_ids"]       = list(seen_ids)
 
-    with open(COST_FILE, "w") as f:
+    with open(COST_FILE, "w", encoding="utf-8") as f:
         json.dump(tracker, f, indent=2)
 
 

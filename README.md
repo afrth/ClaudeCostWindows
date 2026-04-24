@@ -24,12 +24,28 @@ updates status bar in real time
 
 ## Requirements
 
-- macOS / Linux
-- Python 3
-- VSCode
+- Windows / macOS / Linux
+- Python 3 (on Windows, `python` must be on `PATH`)
+- VSCode or VSCode Insiders
 - [Claude Code](https://claude.ai/code) CLI
 
 ## Installation
+
+### Windows (PowerShell)
+
+```powershell
+git clone <repo-url>
+cd ClaudeCost
+./install.ps1
+```
+
+For VSCode Insiders instead of stable VSCode:
+
+```powershell
+./install.ps1 -Insiders
+```
+
+### macOS / Linux
 
 ```bash
 git clone <repo-url>
@@ -37,7 +53,7 @@ cd ClaudeCost
 ./install.sh
 ```
 
-Then **restart VSCode**. The cost tracker appears in the bottom-right status bar.
+Then **restart VSCode** (or VSCode Insiders). The cost tracker appears in the bottom-right status bar.
 
 ## Pricing
 
@@ -69,7 +85,8 @@ The model is detected automatically from the transcript — no configuration nee
 | `hooks/cost_tracker.py` | Claude Code Stop hook — runs after each response |
 | `vscode-extension/extension.js` | VSCode extension — reads the JSON and shows status bar |
 | `vscode-extension/package.json` | Extension manifest |
-| `install.sh` | One-command installer |
+| `install.ps1` | One-command installer (Windows, supports `-Insiders`) |
+| `install.sh` | One-command installer (macOS / Linux) |
 
 ## Data file
 
@@ -87,6 +104,19 @@ Stats are stored in `~/.claude/cost_tracker.json`:
 ```
 
 ## Uninstall
+
+### Windows (PowerShell)
+
+```powershell
+Remove-Item -Recurse -Force "$env:USERPROFILE\.vscode\extensions\claude-cost-tracker-0.1.0"
+# For Insiders:
+# Remove-Item -Recurse -Force "$env:USERPROFILE\.vscode-insiders\extensions\claude-cost-tracker-0.1.0"
+Remove-Item "$env:USERPROFILE\.claude\hooks\cost_tracker.py"
+Remove-Item "$env:USERPROFILE\.claude\cost_tracker.json"
+# Then remove the "hooks" block from %USERPROFILE%\.claude\settings.json
+```
+
+### macOS / Linux
 
 ```bash
 rm -rf ~/.vscode/extensions/claude-cost-tracker-0.1.0
