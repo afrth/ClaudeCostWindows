@@ -15,6 +15,7 @@ LOG_FILE  = os.path.expanduser("~/.claude/cost_log.jsonl")
 
 # Pricing per million tokens: (input, cache_5m_write, cache_1h_write, cache_hit, output)
 PRICING = {
+    "claude-opus-4-8":   (5,    6.25,  10,   0.50, 25),
     "claude-opus-4-7":   (5,    6.25,  10,   0.50, 25),
     "claude-opus-4-6":   (5,    6.25,  10,   0.50, 25),
     "claude-opus-4-5":   (5,    6.25,  10,   0.50, 25),
@@ -36,9 +37,11 @@ M = 1_000_000
 
 def get_pricing(model: str) -> tuple:
     m = (model or "").lower()
-    for key, prices in PRICING.items():
+    # Match the most specific (longest) key first so e.g. "claude-opus-4-8"
+    # isn't swallowed by the generic "claude-opus-4" (Opus 4.0) prefix.
+    for key in sorted(PRICING, key=len, reverse=True):
         if key in m:
-            return prices
+            return PRICING[key]
     return DEFAULT_PRICING
 
 
@@ -85,10 +88,11 @@ def main():
     tracker.setdefault("by_day", {})
     tracker.setdefault("by_project", {})
     tracker.setdefault("by_model", {})
-    tracker.setdefault("sessions", {})
+    tracker.setdefault("seen_ids", [])
 
-    session  = tracker["sessions"].setdefault(session_id, {"seen_ids": [], "project": project})
-    seen_ids = set(session.get("seen_ids", []))
+    # Global dedup across all sessions. Resuming a session reuses msg_ids from the
+    # carried-over transcript, so per-session dedup double-counted those requests.
+    seen_ids = set(tracker["seen_ids"])
 
     today    = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     log_entries = []
@@ -146,7 +150,7 @@ def main():
         return
 
     tracker["last_updated"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    session["seen_ids"]     = list(seen_ids)
+    tracker["seen_ids"]     = list(seen_ids)
 
     with open(COST_FILE, "w", encoding="utf-8") as f:
         json.dump(tracker, f, indent=2)
